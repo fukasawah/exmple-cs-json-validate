@@ -91,11 +91,11 @@ namespace cs_json_validate_reader_example
         [Required]
         [JsonProperty("to")]
         public MailSource To { get; set; }
+
         [Required]
         [MinLength(1)]
         [JsonProperty("from")]
-        public MailSource[] from { get; set; }
-
+        public MailSource[] From { get; set; }
     }
 
     public class MailSource
