@@ -11,15 +11,23 @@ namespace cs_json_validate_reader_example
 {
     public class UnitTest1
     {
+        public static void testValidate<T>(object data)
+        {
+            var dataString = JsonConvert.SerializeObject(data);
+            JsonConvert.DeserializeObject<T>(dataString);
+
+            var parsedObject = JObject.Parse(dataString);
+            var gen = new JSchemaGenerator();
+            gen.DefaultRequired = Required.Default;
+            var mailSchema = gen.Generate(typeof(T));
+
+            parsedObject.Validate(mailSchema);
+        }
+
         [Fact]
         public void Test_正常系()
         {
-            var gen = new JSchemaGenerator();
-            gen.DefaultRequired = Required.Default;
-
-            var mailSchema = gen.Generate(typeof(Mail));
-
-            var data = JsonConvert.SerializeObject(new
+            testValidate<Mail>(new
             {
                 to = new
                 {
@@ -33,20 +41,13 @@ namespace cs_json_validate_reader_example
                     }
                 }
             });
-
-            JObject mailObject = JObject.Parse(data);
-            mailObject.Validate(mailSchema);
         }
+
 
         [Fact]
         public void Test_Toがないとエラー()
         {
-            var gen = new JSchemaGenerator();
-            gen.DefaultRequired = Required.Default;
-
-            var mailSchema = gen.Generate(typeof(Mail));
-
-            var data = JsonConvert.SerializeObject(new
+            Assert.Throws(typeof(JSchemaValidationException), () => testValidate<Mail>(new
             {
                 from = new[] {
                     new {
@@ -54,42 +55,24 @@ namespace cs_json_validate_reader_example
                         name = "fukasawah"
                     }
                 }
-            });
-
-            JObject mailObject = JObject.Parse(data);
-
-            Assert.Throws(typeof(JSchemaValidationException), () => mailObject.Validate(mailSchema));
+            }));
         }
         [Fact]
         public void Test_Fromがないとエラー()
         {
-            var gen = new JSchemaGenerator();
-            gen.DefaultRequired = Required.Default;
-
-            var mailSchema = gen.Generate(typeof(Mail));
-
-            var data = JsonConvert.SerializeObject(new
+            Assert.Throws(typeof(JSchemaValidationException), () => testValidate<Mail>(new
             {
                 to = new
                 {
                     email = "rd@dummy.example",
                     name = "RD",
                 }
-            });
-
-            JObject mailObject = JObject.Parse(data);
-
-            Assert.Throws(typeof(JSchemaValidationException), () => mailObject.Validate(mailSchema));
+            }));
         }
         [Fact]
         public void Test_Fromが1つ以上ないとエラー()
         {
-            var gen = new JSchemaGenerator();
-            gen.DefaultRequired = Required.Default;
-
-            var mailSchema = gen.Generate(typeof(Mail));
-
-            var data = JsonConvert.SerializeObject(new
+            Assert.Throws(typeof(JSchemaValidationException), () => testValidate<Mail>(new
             {
                 to = new
                 {
@@ -97,11 +80,7 @@ namespace cs_json_validate_reader_example
                     name = "RD",
                 },
                 from = new object[0]
-            });
-
-            JObject mailObject = JObject.Parse(data);
-
-            Assert.Throws(typeof(JSchemaValidationException), () => mailObject.Validate(mailSchema));
+            }));
         }
 
     }
