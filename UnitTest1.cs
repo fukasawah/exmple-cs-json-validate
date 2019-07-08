@@ -11,10 +11,9 @@ namespace cs_json_validate_reader_example
 {
     public class UnitTest1
     {
-        public static void testValidate<T>(object data)
+        public static T testValidate<T>(object data)
         {
             var dataString = JsonConvert.SerializeObject(data);
-            JsonConvert.DeserializeObject<T>(dataString);
 
             var parsedObject = JObject.Parse(dataString);
             var gen = new JSchemaGenerator();
@@ -22,12 +21,14 @@ namespace cs_json_validate_reader_example
             var mailSchema = gen.Generate(typeof(T));
 
             parsedObject.Validate(mailSchema);
+
+            return JsonConvert.DeserializeObject<T>(dataString);
         }
 
         [Fact]
         public void Test_正常系()
         {
-            testValidate<Mail>(new
+            var mail = testValidate<Mail>(new
             {
                 to = new
                 {
@@ -41,6 +42,13 @@ namespace cs_json_validate_reader_example
                     }
                 }
             });
+
+            Assert.Equal("rd@dummy.example", mail.To.Email);
+            Assert.Equal("RD", mail.To.Name);
+
+            Assert.Equal("fukasawah@dummy.example", mail.From[0].Email);
+            Assert.Equal("fukasawah", mail.From[0].Name);
+
         }
 
 
@@ -102,8 +110,8 @@ namespace cs_json_validate_reader_example
     {
         [Required]
         [JsonProperty("email")]
-        string Email { get; set; }
+        public string Email { get; set; }
         [JsonProperty("name")]
-        string Name { get; set; }
+        public string Name { get; set; }
     }
 }
