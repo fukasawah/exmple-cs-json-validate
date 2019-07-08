@@ -40,6 +40,18 @@ namespace cs_json_validate_reader_example
                         email = "fukasawah@dummy.example",
                         name = "fukasawah"
                     }
+                },
+                cc = new[] {
+                    new {
+                        email = "cc-fukasawah-1@dummy.example",
+                        name = "cc-fukasawah-1"
+                    }
+                },
+                bcc = new[] {
+                    new {
+                        email = "bcc-fukasawah-1@dummy.example",
+                        name = "bcc-fukasawah-1"
+                    }
                 }
             });
 
@@ -48,6 +60,13 @@ namespace cs_json_validate_reader_example
 
             Assert.Equal("fukasawah@dummy.example", mail.From[0].Email);
             Assert.Equal("fukasawah", mail.From[0].Name);
+
+            Assert.Equal("cc-fukasawah-1@dummy.example", mail.Cc[0].Email);
+            Assert.Equal("cc-fukasawah-1", mail.Cc[0].Name);
+
+            Assert.Equal("bcc-fukasawah-1@dummy.example", mail.Bcc[0].Email);
+            Assert.Equal("bcc-fukasawah-1", mail.Bcc[0].Name);
+
 
         }
 
@@ -95,7 +114,6 @@ namespace cs_json_validate_reader_example
 
     public class Mail
     {
-
         [Required]
         [JsonProperty("to")]
         public MailSource To { get; set; }
@@ -104,6 +122,12 @@ namespace cs_json_validate_reader_example
         [MinLength(1)]
         [JsonProperty("from")]
         public MailSource[] From { get; set; }
+
+        [JsonProperty("cc")]
+        public MailSource[] Cc { get; set; }
+        [JsonProperty("bcc")]
+        public MailSource[] Bcc { get; set; }
+
     }
 
     public class MailSource
