@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <RootNamespace>cs_json_validate_reader_example</RootNamespace>
+    <RootNamespace>exmple_cs_json_validate</RootNamespace>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>

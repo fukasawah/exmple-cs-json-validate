@@ -8,7 +8,7 @@ using Newtonsoft.Json.Schema;
 using Newtonsoft.Json.Schema.Generation;
 using Xunit;
 
-namespace cs_json_validate_reader_example
+namespace exmple_cs_json_validate
 {
     public class UnitTest1
     {
@@ -29,7 +29,6 @@ namespace cs_json_validate_reader_example
         {
             var dataString = JsonConvert.SerializeObject(data);
             return JObject.Parse(dataString);
-
         }
 
         public static T testValidate<T>(object data)
