@@ -74,7 +74,7 @@ namespace cs_json_validate_reader_example
         [Fact]
         public void Test_Toがないならばエラー()
         {
-            Assert.Throws(typeof(JSchemaValidationException), () => testValidate<Mail>(new
+            Assert.Throws<JSchemaValidationException>(() => testValidate<Mail>(new
             {
                 from = new[] {
                     new {
@@ -87,7 +87,7 @@ namespace cs_json_validate_reader_example
         [Fact]
         public void Test_Fromがないならばエラー()
         {
-            Assert.Throws(typeof(JSchemaValidationException), () => testValidate<Mail>(new
+            Assert.Throws<JSchemaValidationException>(() => testValidate<Mail>(new
             {
                 to = new
                 {
@@ -99,7 +99,7 @@ namespace cs_json_validate_reader_example
         [Fact]
         public void Test_Fromが長さ0ならばエラー()
         {
-            Assert.Throws(typeof(JSchemaValidationException), () => testValidate<Mail>(new
+            Assert.Throws<JSchemaValidationException>(() => testValidate<Mail>(new
             {
                 to = new
                 {
