@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
@@ -11,18 +12,35 @@ namespace cs_json_validate_reader_example
 {
     public class UnitTest1
     {
-        public static T testValidate<T>(object data)
+        /// <summary>
+        /// 型引数からJSchemaを生成します。
+        /// </summary>
+        public static JSchema generateSchema<T>()
+        {
+            var gen = new JSchemaGenerator();
+            gen.DefaultRequired = Required.DisallowNull;
+            return gen.Generate(typeof(T));
+        }
+
+        /// <summary>
+        /// （テスト用）匿名型などからJObjectへ変換します
+        /// </summary>
+        public static JObject parse(object data)
         {
             var dataString = JsonConvert.SerializeObject(data);
+            return JObject.Parse(dataString);
 
-            var parsedObject = JObject.Parse(dataString);
-            var gen = new JSchemaGenerator();
-            gen.DefaultRequired = Required.Default;
-            var mailSchema = gen.Generate(typeof(T));
+        }
+
+        public static T testValidate<T>(object data)
+        {
+
+            var mailSchema = generateSchema<T>();
+            var parsedObject = parse(data);
 
             parsedObject.Validate(mailSchema);
 
-            return JsonConvert.DeserializeObject<T>(dataString);
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(data));
         }
 
         [Fact]
@@ -70,6 +88,50 @@ namespace cs_json_validate_reader_example
 
         }
 
+
+        [Fact]
+        public void Test_ValidationErrorの確認()
+        {
+            var mailSchema = generateSchema<Mail>();
+            var parsedObject = parse(new
+            {
+                cc = new[] {
+                    new {
+                        // CCのEmailフォーマット不正
+                        email = "foo@bar@baz",
+                        name = "cc-fukasawah-1"
+                    }
+                },
+                bcc = new[] {
+                    new {
+                        // BCCのEmailない
+                        name = "bcc-fukasawah-1"
+                    }
+                }
+                // Toない
+                // Fromない
+            });
+
+            parsedObject.IsValid(mailSchema, out IList<ValidationError> errors);
+
+            Assert.Equal(3, errors.Count);
+
+            var i = 0;
+            Assert.Equal("cc[0].email", errors[i].Path);
+            Assert.Equal(ErrorType.Pattern, errors[i].ErrorType);
+            Assert.Equal("foo@bar@baz", errors[i].Value);
+
+            i++;
+            Assert.Equal("bcc[0]", errors[i].Path);
+            Assert.Equal(ErrorType.Required, errors[i].ErrorType);
+            Assert.Equal(new[] { "email" }, errors[i].Value);
+
+            i++;
+            Assert.Equal("", errors[i].Path); // ROOT
+            Assert.Equal(ErrorType.Required, errors[i].ErrorType);
+            Assert.Contains("to", errors[i].Value as IList<string>);
+            Assert.Contains("from", errors[i].Value as IList<string>);
+        }
 
         [Fact]
         public void Test_Toがないならばエラー()
@@ -133,6 +195,7 @@ namespace cs_json_validate_reader_example
     public class MailSource
     {
         [Required]
+        [RegularExpression(@"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$")] // ref: https://www.w3.org/TR/html5/forms.html#valid-e-mail-address
         [JsonProperty("email")]
         public string Email { get; set; }
         [JsonProperty("name")]
